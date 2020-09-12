@@ -87,8 +87,11 @@ scrape_org <- function(path) {
   df_out <- iis_df %>%
     filter(!is.na(id)) %>%
     mutate(name = name %>%
-             str_remove("\\(.+\\)$") %>% 
+             str_remove("\\(.+\\)") %>% 
              str_remove_all("[.]") %>%
+             str_remove_all("[-\\s/A-Z\\d]+$") %>%
+             str_remove("\\-[\\w\\s]+$") %>%
+             str_replace(",(?=\\S)", ", ") %>%
              str_squish())
   n_cops <- df_out %>%
     distinct(id) %>%
@@ -103,6 +106,7 @@ dfs <- paths %>%
 
 staff <- bind_rows(dfs, .id = "file") %>%
   dplyr::select(-extra) %>%
+  filter(!name %in% c("w", "Withheld")) %>%
   separate(file, into = c("file_type", "date"), sep = "_") %>%
   group_by(name, rank, id, group) %>%
   summarise(dates = paste(date, collapse = ",")) %>%
