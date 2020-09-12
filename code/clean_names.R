@@ -20,31 +20,31 @@ source(here::here("code/cleanup_utils.R"))
 ########################## QUEERY #############################################
 # after running this stuff & saving it to rds file, it's helpful to comment out
 # to avoid rerunning query every time
-user <- rstudioapi::askForSecret("ojb_user")
-pwd <- rstudioapi::askForSecret("ojb_pwd")
-con <- DBI::dbConnect("PostgreSQL", dbname = "mjcs",
-                      user = user,
-                      password = pwd,
-                      port = 5432,
-                      host = "db.openjusticebaltimore.org")
-
-# basic cleanup
-# make sure space after comma to match names
-# since I'm only looking at differences in names within an ID, gonna remove initials
-fetch <- dbGetQuery(con, "
-            select case_number, name, officer_id
-            from dscr_related_persons 
-            where case_number in (
-            	select case_number 
-            	from cases
-            	where query_court = 'BALTIMORE CITY'
-            )
-            and connection ilike '%POLICE OFFICER%'
-            and name is not null 
-            and officer_id not in ('0000', '9999', 'OOOO');
-           ")
-saveRDS(fetch, "~/dscr_cops_fetch.rds")
-# fetch <- readRDS("~/dscr_cops_fetch.rds")
+# user <- rstudioapi::askForSecret("ojb_user")
+# pwd <- rstudioapi::askForSecret("ojb_pwd")
+# con <- DBI::dbConnect("PostgreSQL", dbname = "mjcs",
+#                       user = user,
+#                       password = pwd,
+#                       port = 5432,
+#                       host = "db.openjusticebaltimore.org")
+# 
+# # basic cleanup
+# # make sure space after comma to match names
+# # since I'm only looking at differences in names within an ID, gonna remove initials
+# fetch <- dbGetQuery(con, "
+#             select case_number, name, officer_id
+#             from dscr_related_persons 
+#             where case_number in (
+#             	select case_number 
+#             	from cases
+#             	where query_court = 'BALTIMORE CITY'
+#             )
+#             and connection ilike '%POLICE OFFICER%'
+#             and name is not null 
+#             and officer_id not in ('0000', '9999', 'OOOO');
+#            ")
+# saveRDS(fetch, "~/dscr_cops_fetch.rds")
+fetch <- readRDS("~/dscr_cops_fetch.rds")
 ###############################################################################
 
 
@@ -141,7 +141,7 @@ comb_thru <- clean_names %>%
 write_csv(clean_names, here::here("data/cleaned_cop_names.csv"))
 write_csv(comb_thru, here::here("data/cop_names_manual_fix.csv"))
 
-DBI::dbDisconnect(con)
+# DBI::dbDisconnect(con)
 ###############################################################################
 
 
@@ -159,3 +159,23 @@ message("Rows pulled out of database: ", nrow(fetch))
 message("Rows in initial set of names & IDs: ", nrow(ids))
 message("Rows after clustering & merging: ", nrow(clean_names))
 message("Rows to comb through externally: ", nrow(comb_thru))
+
+
+
+split_subs <- clean_names %>%
+  arrange(officer_id) %>%
+  mutate(last = str_extract(name_clean, "^([A-Z]+)"),
+         first = str_extract(name_clean, "(?<=,\\s)([A-Z]+)")) %>%
+  filter(n() > 1) %>%
+  nest() %>%
+  mutate(cluster_last = data %>%
+           map(pluck, "last") %>%
+           map(clust_strings, dist_method = "lcs"),
+         cluster_first = data %>%
+           map(filter, !is.na(first)) %>%
+           map(filter, n() > 1) %>%
+           map(pluck, "first") %>%
+           map(function(x) ifelse(length(x) > 1, clust_strings(x, "lcs"), NA_integer_)))
+
+split_subs %>%
+  unnest(c(data, cluster_last, cluster_first))
