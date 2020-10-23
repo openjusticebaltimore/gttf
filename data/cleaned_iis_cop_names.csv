@@ -1,7 +1,7 @@
 name,id
 "Abdi, Ezekiel",I233
-"Adams Jr, Wayne",G098
 "Adams, Robert",G882
+"Adams, Wayne Jr",G098
 "Adkins, Allen",D733
 "Akinwande, Olufemi",I234
 "Albino, Monica",I045
@@ -15,7 +15,6 @@ name,id
 "Amador, Robert",F979
 "Ambrose, Wayne",I329
 "Anderson, Clem",H607
-Antwon Small,H949
 "Ardis, Vicky",F931
 "Atkins, Tyler",T695
 "Avery, Brandon",I176
@@ -38,6 +37,7 @@ Antwon Small,H949
 "Bell, Terry",G695
 "Benett, Freda",S896
 "Benn, Warren",G825
+"Bennett, Freda",S896
 "Bennett, Jason",H782
 "Benson, Keith",F413
 "Bernardez-Ruiz, Jorge",J039
@@ -47,7 +47,6 @@ Antwon Small,H949
 "Blackwell, Troy",F840
 "Blanchard, Jason",I671
 "Bland, Freddie",F202
-"Blueford,","Pinnock, J"
 "Bonaparte, Heyward",G028
 "Booth, Cedric",I364
 "Boots, Beth",T179
@@ -66,15 +65,13 @@ Antwon Small,H949
 "Bruno, Angela",T771
 "Burchill, Paul",G954
 "Burkett, Michael",D135
-"Burns Jr, John",G940
 "Burns, John",G940
-"Burrus, Torran",G-156
+"Burns, John Jr",G940
 "Burrus, Torran",G156
 "Burton, Joseph",G348
 "Button, Bruce",E415
 "Byrd, Adriene",H108
 "Cabreja, Emmanuel",H942
-Calloway Hatcher,C384
 "Calpin, John",D971
 "Campusano,",H776
 "Carrington,",H124
@@ -92,7 +89,6 @@ Calloway Hatcher,C384
 "Ciotti, David",H894
 "Cirillo, Anthony",G461
 "Cirillo, Anthony",I726
-Clarence Grear,F939
 "Clark, Robert",I653
 "Clark, Tony",H616
 "Clarke, Robert",I653
@@ -108,13 +104,11 @@ Clarence Grear,F939
 "Connolly, Kendall",F756
 "Corrigan, Patrick",I500
 "Corso, Robert",H966
-"Councill,","Herald, H"
 "Crespo, Jomari",J078
 "Crosby, Bradley",F727
 "Crystal, Joseph",I644
 "Danielczyk, Scott",F595
 "Danzy, Danny",E549
-"Davis,","Wartman, R"
 "Davis, Phillip",J040
 "Day, Matt",G268
 "Day, Matthew",G268
@@ -133,15 +127,13 @@ Clarence Grear,F939
 "Djan, Michael",T667
 "Djan, Michael",T687
 "Dobbins, Wanda",D807
-"Dodge, Jr, Harry",G557
+"Dodge, Harry Jr",G557
 "Dorsey, Alan",F216
-Doug Wine,F509
 "Dressel, Michael",E766
-Duane Weston,H663
 "Dunton, Kevin",F765
 "Earp, Phillip",F729
 "Echevarria, Brandon",G974
-"Eigner,","Green, H"
+"Eldridge, Manuel",F020
 "Ellis, Lavern",E924
 "Ellis, Laverne",E924
 "Ellison, Tony",E874
@@ -150,6 +142,7 @@ Duane Weston,H663
 "Estes, Donald",I967
 "Esworthy, Lee",E941
 "Evans, Steven",H611
+"Everett, Roan",F109
 "Fair, Bryant",G321
 "Faller, Christopher",G351
 "Fassl, Kevin",J291
@@ -159,7 +152,6 @@ Duane Weston,H663
 "Ferguson, Aaron",F630
 "Ferguson, Triston",G873
 "Feser, Jason",H530
-"Fidler, Joshua",I-709
 "Fidler, Joshua",I709
 "Fields, Dale",C489
 "Finein, William",H792
@@ -179,14 +171,13 @@ Duane Weston,H663
 "Frieman, Benjamin",I847
 "Fries, Michael",E895
 "Fries, Suzanne",G389
-"Fritzges Jr, Joseph",G926
 "Fritzges, Joseph",G926
-"Fry,","Haygood, M"
+"Fritzges, Joseph Jr",G926
 "Fuller, Vernon",H059
 "Furlong, William",D770
 "Furman, Leo",E954
-"Fyffe Jr, Danny",F475
 "Fyffe, Danny",F475
+"Fyffe, Danny Jr",F475
 "Galeano, Keith",I429
 "Garber, Jason",H475
 "Garrett, Jonathan",I232
@@ -199,7 +190,6 @@ Duane Weston,H663
 "Geddis, Eric",F019
 "Geho, Tracy",E945
 "Geiselman, Elizabeth",C937
-George McClaskey,E394
 "George, Michael",F985
 "Gerace, Robert",F383
 "Gerber, Scott",E106
@@ -232,8 +222,8 @@ George McClaskey,E394
 "Green,",G261
 "Green, David",G318
 "Green, Eric",G261
-"Greene Jr , David",G318
 "Greene, David",G318
+"Greene, David Jr",G318
 "Greene, Gregory",E359
 "Greenhill,",F820
 "Grueninger, Greg",F821
@@ -244,11 +234,9 @@ George McClaskey,E394
 "Hall, Maggie",J066
 "Hall, Michael",F431
 "Halstead, Stephen",G293
-"Hankard Jr, Robert",I370
 "Hankard, Robert",I370
+"Hankard, Robert Jr",I370
 "Hankard, Robt",I370
-"Hardesty,","Nock, T"
-Harris Jamal,G100
 "Harris, Jamal",G100
 "Harris, William",E450
 "Hartman, Craig",D840
@@ -285,18 +273,19 @@ Harris Jamal,G100
 "Hopkins, Francisco",I633
 "Hopson,",G978
 "Hopson, Antonio",G978
-"Howard Jr, Rodney",H603
 "Howard, Rodney",H603
+"Howard, Rodney Jr",H603
 "Hubbard, Jaclyn",G591
 "Hunsicker, Franklin",G521
 "Iacovo,",J036
 "Iacovo, Peter",J036
 "Icenroad, Chris",H518
-"Ilgenfritz Jr, Howard",H066
 "Ilgenfritz, Howard",H066
+"Ilgenfritz, Howard Jr",H066
 "Ivery, Kenneth",G495
 "Jackson, Fletcher",H610
 "Jackson, Jerron",H604
+"Jamal, Harris",G100
 "Jansen, Eric",F480
 "Janu, William",H886
 "Jefferson, Eric",G516
@@ -309,7 +298,6 @@ Harris Jamal,G100
 "Ji, Kai",T688
 "Jimmerson,",G905
 "Jimmerson, Delford",G905
-John Clewell,I711
 "John, Audwyn",G503
 "Johnson,",G668
 "Johnson,",I698
@@ -332,8 +320,6 @@ John Clewell,I711
 "Keene, Garrett",F055
 "Kelly, Josh",H944
 "Kelly, Joshua",H944
-Keona Waller,H974
-Kevin Jones,F927
 "Kienle,",H698
 "Kim, Yoo",H098
 "Kincaid, David",I995
@@ -365,11 +351,10 @@ Kevin Jones,F927
 "Lewellen,",I377
 "Lewellen, Adam",I377
 "Lilly, Jeffrey",H642
-Lisa Letren,T672
+"Lofton, Osiris",H067
 "Lopez, Angel",F902
 "Loton, Osiris",H067
 "Louvado, Ivo",G550
-"Lt Fries, Suzanne",G389
 "Lunetta,",I572
 "Lunetta, Nicholas",I572
 "Lynch, Wayne",J112
@@ -379,14 +364,12 @@ Lisa Letren,T672
 "Mahan, Steve",F787
 "Mahan, Steven",F787
 "Mancuso, Holly",G661
-"Mangano Jr, John",I192
 "Mangano, John",I192
+"Mangano, John Jr",I192
 "Manners, Charles",G551
 "Manning, Richard",F886
 "Manns, Karen",E831
-Manuel Eldridge,F020
 "Margolis, Sam",T691
-Mario Notargiacomo,E617
 "Marsh, Nevin",G067
 "Martin, Michael",I209
 "Martin, Stephen",C844
@@ -397,6 +380,7 @@ Mario Notargiacomo,E617
 "Matzerath, John",F750
 "Mays, Stephen",H589
 "McCauley, David",I675
+"McClaskey, George",E394
 "McDermott, David",F060
 "McDuffie, Carnest",H700
 "McElroy, Denise",S448
@@ -441,18 +425,15 @@ Mario Notargiacomo,E617
 "Neptune, Mark",I562
 "Neptune, Mark",I582
 "Neuens, Robert",F937
-Nevin Marsh,G067
 "Notargiacomo, Mario",E617
 "O'Ree, Chris",F969
 "O'Sullivan, M",G827
 "O'Sullivan, Michael",G827
-OIII Freda Bennett,S896
 "Ojeda, Ricardo",I942
 "Ondek, John",F261
 "Orenstein, Joe",T655
 "Orenstein, Joseph",T655
 "Osborne, Darryl",D439
-Osiris Lofton,H067
 "Ostrow, Derek",F154
 "Ott, Chris",G908
 "Ott, Christopher",G908
@@ -465,8 +446,6 @@ Osiris Lofton,H067
 "Paul, Thomas",E038
 "Peters, Glenn",H946
 "Pietryak, David",I159
-"Pinnock,","Gingles, T"
-"Pinnock,","Mitchell, M"
 "Pinto, Edward",E573
 "Pitocchelli, Julie",F551
 "Pittman, Arnold",F434
@@ -501,13 +480,10 @@ Osiris Lofton,H067
 "Richburg, Kendell",G571
 "Rivera, Victor",F447
 "Riveria-Martinez, Car",I870
-Roan Everett,F109
 "Roberts, Roy",I718
-"Robinson,","Arthur, D"
 "Rodgers, Rena",F208
 "Rodriguez, Albert",J334
 "Rogers, Norman",J149
-Roland Williams,H624
 "Roland, Sharon",S972
 "Romeo, Timothy",I678
 "Romey, Stephen",I681
@@ -520,7 +496,6 @@ Roland Williams,H624
 "Ross, Kenneth",G401
 "Rotell, Albert",H198
 "Ruiz, Luis",H152
-Ryan Dickstein,I637
 "Ryckman, Mathew",I100
 "Ryckman, Matt",I100
 "Ryckman, Matthew",I100
@@ -530,8 +505,8 @@ Ryan Dickstein,I637
 "Salefski, Daniel",E626
 "Salmon, Brian",J072
 "Saunders, Antonio",H892
-"Schmidt Jr, Charles",F068
 "Schmidt, Charles",F068
+"Schmidt, Charles Jr",F068
 "Schmidt, Christopher",F989
 "Schreyer, Chris",G333
 "Scott, Kenneth",H791
@@ -542,14 +517,14 @@ Ryan Dickstein,I637
 "Sgt Emich, Chris",E379
 "Shetterly, James",G807
 "Shifflett, Norm",G441
-"Shockley Jr, James",G712
 "Shockley, James",G712
+"Shockley, James Jr",G712
 "Shores, Donald",F670
 "Shutt, Brian",H256
 "SIC Emich, Chris",E379
 "Siegmund, Leo",E218
-"Sills Jr, Charles",H632
 "Sills, Charles",H632
+"Sills, Charles Jr",H632
 "Slack, Steven",H923
 "Small, Antwon",H939
 "Small, Antwon",H949
@@ -576,7 +551,6 @@ Ryan Dickstein,I637
 "Street, Craig",G631
 "Streett, Amy",G879
 "Streett, Craig",G631
-"Strohman, Todd",I-743
 "Strohman, Todd",I743
 "Sullivan, Akinlawon",H027
 "Talley, Christopher",G391
@@ -613,16 +587,16 @@ Ryan Dickstein,I637
 "Vodarick, Michael",H764
 "Volk, Shane",I592
 "Wagner, Edward",C415
+"Waller, Keona",H974
 "Waller, Keonna",H974
 "Wallner, Robert",D487
-"Ward Jr, Maurice",H456
 "Ward, Maurice",H456
+"Ward, Maurice Jr",H456
 "Ward, Steven",G415
 "Warrington, Ava",I664
 "Warrington, Ava",I644
 "Waskiewicz, Daniel",J126
 "Watkins, Charlene",D816
-"Wayland,","Perzan, M"
 "Weeks, Donald",C325
 "West, Jeffrey",H937
 "West, John",H662
@@ -632,7 +606,6 @@ Ryan Dickstein,I637
 "Wiczulis, Joseph",I357
 "Wigley, Robert",I426
 "Wilhelm, Michael",E995
-William MacDonald,E971
 "Williams, Andrew",F061
 "Williams, Craig",E968
 "Williams, Donta",H319
@@ -653,7 +626,7 @@ William MacDonald,E971
 "Worsley, Larry",H435
 "Yamin, Gary",E428
 "Yamin, Lewis",E428
-"Yeager, Christopher",T???
+"Yeager, Christopher",T
 "Yeager, Christopher",T772
 "Young, Deborah",H873
 "Young, Kawahn",H308

@@ -16,10 +16,14 @@ library(stringdist)
 
 source(here::here("code/cleanup_utils.R"))
 
+# bring in the cleaned up names from rosters, 2012–2017
+rosters <- read_csv(here::here("data/cleaned_iis_cop_names.csv")) %>%
+  mutate(name = toupper(name)) %>%
+  rename(officer_id = id)
 
 ########################## QUEERY #############################################
-# after running this stuff & saving it to rds file, it's helpful to comment out
-# to avoid rerunning query every time
+# # after running this stuff & saving it to rds file, it's helpful to comment out
+# # to avoid rerunning query every time
 # user <- rstudioapi::askForSecret("ojb_user")
 # pwd <- rstudioapi::askForSecret("ojb_pwd")
 # con <- DBI::dbConnect("PostgreSQL", dbname = "mjcs",
@@ -33,17 +37,18 @@ source(here::here("code/cleanup_utils.R"))
 # # since I'm only looking at differences in names within an ID, gonna remove initials
 # fetch <- dbGetQuery(con, "
 #             select case_number, name, officer_id
-#             from dscr_related_persons 
+#             from dscr_related_persons
 #             where case_number in (
-#             	select case_number 
+#             	select case_number
 #             	from cases
 #             	where query_court = 'BALTIMORE CITY'
 #             )
 #             and connection ilike '%POLICE OFFICER%'
-#             and name is not null 
+#             and name is not null
 #             and officer_id not in ('0000', '9999', 'OOOO');
 #            ")
 # saveRDS(fetch, "~/dscr_cops_fetch.rds")
+# DBI::dbDisconnect(con)
 fetch <- readRDS("~/dscr_cops_fetch.rds")
 ###############################################################################
 
@@ -76,15 +81,17 @@ ids <- fetch %>%
   mutate(officer_id = str_replace_all(officer_id, "\\BO", "0")) %>%
   filter(str_count(name, "[A-Z]") >= 3) %>%
   distinct(name, officer_id) %>%
-  arrange(officer_id) %>%
-  group_by(officer_id)
+  arrange(officer_id)
 ###############################################################################
 
 
 ########################## TEST CASES #########################################
 # ids <- ids %>% filter(officer_id %in% c("A089", "0031", "0196", "E466", "E428"))
 ###############################################################################
-
+# could use .id to mark off source and weight rosters as higher than CV, but for now seems not necessary
+ids2 <- bind_rows(rosters, ids) %>%
+  distinct(name, officer_id, .keep_all = TRUE) %>%
+  group_by(officer_id)
 
 ########################## CLUSTER & DEDUPE ###################################
 # for IDs with more than one name, start by cleaning based on subsetting names.
@@ -93,7 +100,7 @@ ids <- fetch %>%
 # within each ID & cluster, assign all names to be the one with most characters.
 # default params make pretty conservative string similarity calculations, so I'm not 
 # too concerned about merging names that shouldn't be seen as the same
-clustered <- ids %>%
+clustered <- ids2 %>%
   filter(n() > 1) %>%
   mutate(subs = name_get_subset(name)) %>%
   nest() %>%
@@ -107,7 +114,7 @@ clustered <- ids %>%
 # ids %>% filter(n() == 1) are the IDs that are only associated with one name
 # for now, assuming those are correct.
 # bind that to the deduped ones
-clean_names <- ids %>%
+clean_names <- ids2 %>%
   filter(n() == 1) %>%
   mutate(name_clean = name) %>%
   bind_rows(clustered) %>%
@@ -160,22 +167,37 @@ message("Rows in initial set of names & IDs: ", nrow(ids))
 message("Rows after clustering & merging: ", nrow(clean_names))
 message("Rows to comb through externally: ", nrow(comb_thru))
 
+pluck_n_clust <- function(x, id, ...) {
+  i <- pluck(x, id)
+  possibly(function(y) clust_strings(y, ...), NA)
+}
 
-
-split_subs <- clean_names %>%
-  arrange(officer_id) %>%
-  mutate(last = str_extract(name_clean, "^([A-Z]+)"),
-         first = str_extract(name_clean, "(?<=,\\s)([A-Z]+)")) %>%
-  filter(n() > 1) %>%
-  nest() %>%
-  mutate(cluster_last = data %>%
-           map(pluck, "last") %>%
-           map(clust_strings, dist_method = "lcs"),
-         cluster_first = data %>%
-           map(filter, !is.na(first)) %>%
-           map(filter, n() > 1) %>%
-           map(pluck, "first") %>%
-           map(function(x) ifelse(length(x) > 1, clust_strings(x, "lcs"), NA_integer_)))
-
-split_subs %>%
-  unnest(c(data, cluster_last, cluster_first))
+# split_subs <- clean_names %>%
+#   arrange(officer_id) %>%
+#   separate(name_clean, into = c("last", "first"), sep = ", ", remove = FALSE) %>%
+#   filter(n() > 1) %>%
+#   nest() %>%
+#   mutate(cluster_last = data %>%
+#            map(pluck, "last") %>%
+#            map(clust_strings, dist_method = "lcs"),
+#          cluster_first = data %>%
+#            # map(filter, !is.na(first)) %>%
+#            # map(filter, n() > 1) %>%
+#            map(pluck, "first") %>%
+#            map(function(x) if (sum(!is.na(x)) > 1) clust_strings(x, "lcs") else rep_along(x, NA_integer_)))
+# 
+# 
+# clean_names %>%
+#   arrange(officer_id) %>%
+#   filter(n() > 1, str_detect(officer_id, "[B-Z]")) %>%
+#   ungroup() %>%
+#   slice(1:1000) %>%
+#   group_by(officer_id) %>%
+#   separate(name_clean, into = c("last", "first"), sep = ", ", remove = FALSE) %>%
+#   pivot_longer(last:first, names_to = "part", values_to = "name", values_drop_na = TRUE) %>%
+#   group_by(officer_id, part) %>%
+#   filter(n() > 1) %>%
+#   mutate(clust = clust_strings(name, "jw")) %>%
+#   mutate(n_clust = n_distinct(clust)) %>%
+#   filter(n_clust == 1) %>%
+#   print(n = 100)
