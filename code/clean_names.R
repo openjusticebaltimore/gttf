@@ -16,6 +16,25 @@ library(stringdist)
 
 source(here::here("code/cleanup_utils.R"))
 
+# after running thru the script a couple times & adjusting parameters, these are running sets of 
+# misspelled & abbreviated names to feed back through for cleaning
+# idk why I had this in the utils script
+misspelled <- read_csv("https://calc.mayfirst.org/0axbk96wlw47.csv") %>%
+  mutate_at(vars(misspelled, correct), toupper) %>%
+  mutate(patt = case_when(
+    first_or_last == "first" ~ "(?<=,\\s)\\b%s\\b",
+    first_or_last == "last"  ~ "\\b%s\\b(?=,\\s)",
+    TRUE                     ~ "\\b%s\\b"
+  )) %>%
+  mutate(misspelled = sprintf(patt, misspelled)) %>%
+  select(misspelled, correct) %>%
+  deframe()
+abbr <- read_csv("https://calc.mayfirst.org/kv8dxti8lntv.csv") %>%
+  mutate(short = sprintf("\\b%s\\b", short)) %>%
+  deframe()
+corrections <- c(misspelled, abbr)
+rm(misspelled, abbr)
+
 # bring in the cleaned up names from rosters, 2012–2017
 rosters <- read_csv(here::here("data/cleaned_task_force_cop_names.csv")) %>%
   mutate(name = toupper(name)) %>%
@@ -24,8 +43,6 @@ rosters <- read_csv(here::here("data/cleaned_task_force_cop_names.csv")) %>%
 ########################## QUEERY #############################################
 # # after running this stuff & saving it to rds file, it's helpful to comment out
 # # to avoid rerunning query every time
-# user <- rstudioapi::askForSecret("ojb_user")
-# pwd <- rstudioapi::askForSecret("ojb_pwd")
 # con <- DBI::dbConnect("PostgreSQL", dbname = "mjcs",
 #                       user = Sys.getenv("ojb_user"),
 #                       password = Sys.getenv("ojb_pwd"),
@@ -62,6 +79,7 @@ fetch <- readRDS("~/dscr_cops_fetch.rds")
 # make corrections from ^^ spreadsheets
 # only keep if at least 3 alphabet characters remain
 # fix a few places where IDs have O in place of 0
+# adding in a count: how mmany times was a given name-ID combo observed, so we can see which are more likely accurate
 ids <- fetch %>%
   as_tibble() %>%
   mutate(name = name %>%
@@ -81,7 +99,7 @@ ids <- fetch %>%
            trimws()) %>%
   mutate(officer_id = str_replace_all(officer_id, "\\BO", "0")) %>%
   filter(str_count(name, "[A-Z]") >= 3) %>%
-  distinct(name, officer_id) %>%
+  count(name, officer_id) %>%
   arrange(officer_id)
 ###############################################################################
 
@@ -91,8 +109,8 @@ ids <- fetch %>%
 ###############################################################################
 # could use .id to mark off source and weight rosters as higher than CV, but for now seems not necessary
 ids2 <- bind_rows(rosters, ids) %>%
-  distinct(name, officer_id, .keep_all = TRUE) %>%
-  group_by(officer_id)
+  group_by(officer_id, name) %>%
+  summarise(n = sum(n))
 
 ########################## CLUSTER & DEDUPE ###################################
 # for IDs with more than one name, start by cleaning based on subsetting names.
@@ -119,10 +137,26 @@ clean_names <- ids2 %>%
   filter(n() == 1) %>%
   mutate(name_clean = name) %>%
   bind_rows(clustered) %>%
-  select(-cluster) %>%
+  dplyr::select(-cluster) %>%
   mutate(name_clean = str_remove(name_clean, ",$")) %>%
-  arrange(name_clean, officer_id) %>%
-  distinct(officer_id, name_clean)
+  group_by(officer_id, name_clean) %>%
+  summarise(n = sum(n)) %>%
+  arrange(officer_id, -n)
+
+# if first name is the same within an ID but last name is different, assume
+# maiden vs married name & concat last names
+# not convinced this is solid, so I'm not writing it out yet
+clean_names %>%
+  separate(name_clean, into = c("last", "first"), sep = ", ", remove = FALSE) %>%
+  filter(n() > 1) %>%
+  mutate(across(last:first, list(cluster = clust_strings), dist_method = "jw")) %>%
+  group_by(officer_id, first_cluster) %>%
+  summarise(last = paste(last, collapse = " / "),
+            first = longest(first),
+            n = sum(n)) %>%
+  mutate(name_clean = paste(last, first, sep = ", ")) %>%
+  filter(str_detect(name_clean, "/"))
+
 
 
 # generate list of possible misspellings to check. maybe easiest is to do this in openrefine
@@ -167,21 +201,6 @@ message("Rows in initial set of names & IDs: ", nrow(ids))
 message("Rows after clustering & merging: ", nrow(clean_names))
 message("Rows to comb through externally: ", nrow(comb_thru))
 
-# pluck_n_clust <- function(x, id, ...) {
-#   i <- pluck(x, id)
-#   cl <- function(y) clust_strings(y, ...)
-#   possibly(cl, NA)
-# }
-# split_subs <- clean_names %>%
-#   arrange(officer_id) %>%
-#   separate(name_clean, into = c("last", "first"), sep = ", ", remove = FALSE) %>%
-#   filter(n() > 1) %>%
-#   nest() %>%
-#   mutate(cluster_last = data %>%
-#            map(pluck, "last") %>%
-#            map(clust_strings, dist_method = "lcs"),
-#          cluster_first = data %>%
-#            # map(filter, !is.na(first)) %>%
-#            # map(filter, n() > 1) %>%
-#            map(pluck, "first") %>%
-#            map(function(x) if (sum(!is.na(x)) > 1) clust_strings(x, "lcs") else rep_along(x, NA_integer_)))
+
+
+

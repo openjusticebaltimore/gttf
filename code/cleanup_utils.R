@@ -1,26 +1,13 @@
 ########################## META SHIT ##########################################
-# after running thru the script a couple times & adjusting parameters, these are running sets of 
-# misspelled & abbreviated names to feed back through for cleaning
-misspelled <- read_csv("https://calc.mayfirst.org/0axbk96wlw47.csv") %>%
-  mutate_at(vars(misspelled, correct), toupper) %>%
-  mutate(patt = case_when(
-    first_or_last == "first" ~ "(?<=,\\s)\\b%s\\b",
-    first_or_last == "last"  ~ "\\b%s\\b(?=,\\s)",
-    TRUE                     ~ "\\b%s\\b"
-  )) %>%
-  mutate(misspelled = sprintf(patt, misspelled)) %>%
-  select(misspelled, correct) %>%
-  deframe()
-abbr <- read_csv("https://calc.mayfirst.org/kv8dxti8lntv.csv") %>%
-  mutate(short = sprintf("\\b%s\\b", short)) %>%
-  deframe()
-corrections <- c(misspelled, abbr)
-rm(misspelled, abbr)
+
 ###############################################################################
 
 ########################## FUNCTIONS ##########################################
 clust_strings <- function(x, dist_method = "jaccard", q = 2, h = 0.5, p = 0) {
+  # replace na with multiples of 1000 so they're far apart from text, but also from each other
+
   mtx <- 1 - stringsimmatrix(x, method = dist_method, q = q)
+  mtx[is.na(mtx)] <- seq_along(mtx[is.na(mtx)]) * 1000
   as.dist(mtx) %>%
     hclust(method = "complete") %>%
     cutree(h = h)

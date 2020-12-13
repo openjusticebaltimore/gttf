@@ -125,7 +125,7 @@ cop_names <- cops %>%
   group_by(name, rank, id, group) %>%
   summarise(dates = paste(date, collapse = ",")) %>%
   ungroup() %>%
-  distinct(name, id)
+  count(name, id)
 
 message(crayon::yellow(str_glue("Total unique cops & IDs: {nrow(cop_names)}")))
 
