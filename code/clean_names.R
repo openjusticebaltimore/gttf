@@ -17,7 +17,7 @@ library(stringdist)
 source(here::here("code/cleanup_utils.R"))
 
 # bring in the cleaned up names from rosters, 2012–2017
-rosters <- read_csv(here::here("data/cleaned_iis_cop_names.csv")) %>%
+rosters <- read_csv(here::here("data/cleaned_task_force_cop_names.csv")) %>%
   mutate(name = toupper(name)) %>%
   rename(officer_id = id)
 
@@ -27,8 +27,8 @@ rosters <- read_csv(here::here("data/cleaned_iis_cop_names.csv")) %>%
 # user <- rstudioapi::askForSecret("ojb_user")
 # pwd <- rstudioapi::askForSecret("ojb_pwd")
 # con <- DBI::dbConnect("PostgreSQL", dbname = "mjcs",
-#                       user = user,
-#                       password = pwd,
+#                       user = Sys.getenv("ojb_user"),
+#                       password = Sys.getenv("ojb_pwd"),
 #                       port = 5432,
 #                       host = "db.openjusticebaltimore.org")
 # 
@@ -49,6 +49,7 @@ rosters <- read_csv(here::here("data/cleaned_iis_cop_names.csv")) %>%
 #            ")
 # saveRDS(fetch, "~/dscr_cops_fetch.rds")
 # DBI::dbDisconnect(con)
+
 fetch <- readRDS("~/dscr_cops_fetch.rds")
 ###############################################################################
 
@@ -148,7 +149,6 @@ comb_thru <- clean_names %>%
 write_csv(clean_names, here::here("data/cleaned_cop_names.csv"))
 write_csv(comb_thru, here::here("data/cop_names_manual_fix.csv"))
 
-# DBI::dbDisconnect(con)
 ###############################################################################
 
 
@@ -167,11 +167,11 @@ message("Rows in initial set of names & IDs: ", nrow(ids))
 message("Rows after clustering & merging: ", nrow(clean_names))
 message("Rows to comb through externally: ", nrow(comb_thru))
 
-pluck_n_clust <- function(x, id, ...) {
-  i <- pluck(x, id)
-  possibly(function(y) clust_strings(y, ...), NA)
-}
-
+# pluck_n_clust <- function(x, id, ...) {
+#   i <- pluck(x, id)
+#   cl <- function(y) clust_strings(y, ...)
+#   possibly(cl, NA)
+# }
 # split_subs <- clean_names %>%
 #   arrange(officer_id) %>%
 #   separate(name_clean, into = c("last", "first"), sep = ", ", remove = FALSE) %>%
@@ -185,19 +185,3 @@ pluck_n_clust <- function(x, id, ...) {
 #            # map(filter, n() > 1) %>%
 #            map(pluck, "first") %>%
 #            map(function(x) if (sum(!is.na(x)) > 1) clust_strings(x, "lcs") else rep_along(x, NA_integer_)))
-# 
-# 
-# clean_names %>%
-#   arrange(officer_id) %>%
-#   filter(n() > 1, str_detect(officer_id, "[B-Z]")) %>%
-#   ungroup() %>%
-#   slice(1:1000) %>%
-#   group_by(officer_id) %>%
-#   separate(name_clean, into = c("last", "first"), sep = ", ", remove = FALSE) %>%
-#   pivot_longer(last:first, names_to = "part", values_to = "name", values_drop_na = TRUE) %>%
-#   group_by(officer_id, part) %>%
-#   filter(n() > 1) %>%
-#   mutate(clust = clust_strings(name, "jw")) %>%
-#   mutate(n_clust = n_distinct(clust)) %>%
-#   filter(n_clust == 1) %>%
-#   print(n = 100)

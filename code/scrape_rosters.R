@@ -2,22 +2,20 @@ library(tidyverse)
 library(readxl)
 library(raster)
 
-paths <- list.files("../rosters", full.names = TRUE) %>%
-  set_names(function(x) {
-    bn <- basename(x)
-    date <- str_extract(bn, "(\\d{4}\\-\\d{2}\\-\\d{2}|\\d{2}\\-\\d{2}\\-\\d{4}|\\w+\\s\\d{2}\\s\\d{4})")[1]
-    # get standardized date format
-    # ifelse(str_detect(date, "\\d{4}$"), lubridate::mdy(date), lubridate::ymd(date)) %>%
-    #   format("%Y-%m-%d")
-    if (str_detect(date, "\\d{4}$")) {
-      date <- lubridate::mdy(date)
-    } else {
-      date <- lubridate::ymd(date)
-    }
-    type <- str_extract(bn, "\\b([A-Z\\s]+)\\b")
-    paste(trimws(type), date, sep = "_")
-  })
+path_meta <- tibble(path = list.files("../rosters", full.names = TRUE)) %>%
+  mutate(bn = basename(path),
+         date_str = str_extract(bn, "(\\d{4}\\-\\d{1,2}\\-\\d{1,2}|\\d{1,2}\\-\\d{1,2}\\-\\d{4}|\\w+\\s?\\d{1,2}\\s\\d{4})") %>%
+           str_replace("Sept\\b", "Sep"),
+         mdy = str_detect(date_str, "\\d{4}$"),
+         date = if_else(mdy, lubridate::mdy(date_str), lubridate::ymd(date_str)),
+         type = str_extract(bn, "\\b([A-Z\\s]+)\\b") %>%
+           str_squish() %>%
+           str_replace("^$", "unlabeled")) %>%
+  unite(name, type, date, remove = FALSE)
 
+paths <- path_meta %>%
+  dplyr::select(name, path) %>%
+  deframe()
 
 
 # rows are sometimes staggered, so marking off across whole table won't work. columns are more consistent, so reverse to do columns first, then rows
@@ -111,24 +109,34 @@ scrape_org <- function(path) {
 dfs <- paths %>%
   map(possibly(scrape_org, otherwise = NULL))
 
-
-staff <- bind_rows(dfs, .id = "file") %>%
-  dplyr::select(-extra) %>%
+cops <- bind_rows(dfs, .id = "file") %>%
+  dplyr::select(-any_of("extra"), -row, -grid) %>%
   filter(!name %in% c("w", "Withheld"), rank != "CIV") %>%
   separate(file, into = c("file_type", "date"), sep = "_") %>%
+  mutate(date = as.Date(date),
+         group = group %>%
+           # str_remove_all("[\\(\\)]") %>%
+           str_replace_all(c("One" = "1", "Two" = "2", "Citiwatch" = "Citi Watch", "CitiWatch" = "Citi Watch", "Inv\\b" = "Investigations", "Comstat" = "ComStat", "Vce" = "Vice", "VICE" = "Vice")))
+
+# would be good to clean up / understand unit names and deduplicate
+# sort(unique(cops$group))
+
+cop_names <- cops %>%
   group_by(name, rank, id, group) %>%
   summarise(dates = paste(date, collapse = ",")) %>%
-  ungroup()
-
-dist_staff <- staff %>%
+  ungroup() %>%
   distinct(name, id)
 
-message(crayon::yellow(str_glue("Total unique cops & IDs: {nrow(dist_staff)}")))
+message(crayon::yellow(str_glue("Total unique cops & IDs: {nrow(cop_names)}")))
 
-write_csv(dist_staff, "data/cleaned_iis_cop_names.csv")
+write_csv(cop_names, "data/cleaned_task_force_cop_names.csv")
 
 
-
+cops %>%
+  group_by(id, name, rank, group) %>%
+  summarise(first_date = min(date),
+            last_date = max(date)) %>%
+  write_csv("data/task_force_memberships_dated.csv")
 
 
 
