@@ -7,4 +7,5 @@ project.Rproj
 .Renviron
 data/analysis_1/
 auth/
-input_data/rosters
+data/rosters/
+docs/references/
