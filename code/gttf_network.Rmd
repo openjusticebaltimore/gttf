@@ -1,0 +1,129 @@
+---
+title: "cop network"
+output: html_document
+---
+
+Here's a moderately crappy network of GTTF cops (based on rosters) and the cops they have cases with. Could merit a real graph analysis if we want.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = TRUE,
+	fig.showtext = TRUE,
+	dpi = 300
+)
+```
+
+```{r}
+library(tidyverse)
+library(tidygraph)
+library(ggraph)
+library(showtext)
+library(networkD3)
+
+showtext_auto()
+```
+
+```{r}
+clean_names <- read_csv(here::here("data/cleaned_cop_names.csv"))
+tfs <- read_csv(here::here("data/task_force_memberships_dated.csv")) %>%
+  rename(officer_id = id)
+cases <- readRDS("~/dscr_cops_fetch.rds") %>%
+  filter(str_detect(officer_id, "^[A-Z]")) %>%
+  select(-name)
+```
+
+```{r}
+# would be cool to build in rank
+gttf <- tfs %>%
+  mutate(rank = as.factor(rank) %>% fct_relevel("Sgt")) %>%
+  filter(str_detect(group, "(Gun Trace|GTTF)"))
+
+edges <- gttf %>%
+  distinct(officer_id) %>%
+  inner_join(cases, by = "officer_id") %>%
+  inner_join(cases, by = "case_number") %>%
+  filter(officer_id.x != officer_id.y) %>%
+  mutate(id = pmap(list(officer_id.x, officer_id.y), ~sort(c(.x, .y)))) %>%
+  unnest_wider(id, names_sep = "") %>%
+  group_by(from = id1, to = id2) %>%
+  summarise(n_cases = n()) %>%
+  ungroup() %>%
+  mutate(edge_rank = percent_rank(n_cases))
+
+gttf_net <- edges %>%
+  as_tbl_graph(directed = FALSE) %>%
+  rename(id = name) %>%
+  mutate(degree = centrality_degree(weights = n_cases, loops = FALSE),
+         is_gttf = id %in% gttf$officer_id)
+```
+
+```{r}
+gttf_main_net <- gttf_net %>%
+  activate(edges) %>%
+  filter(n_cases >= 20) %>%
+  activate(nodes) %>%
+  filter(!node_is_isolated())
+
+
+gttf_main_net %>%
+  ggraph() +
+  geom_edge_link(alpha = 0.1) +
+  geom_node_point(aes(size = degree, color = is_gttf), alpha = 0.8) +
+  theme_void() +
+  scale_color_manual(values = c("TRUE" = "mediumorchid", "FALSE" = "gray50")) +
+  scale_size_area(max_size = 8)
+```
+
+```{r}
+gttf_net %>%
+  mutate(group = as.factor(group_fast_greedy(weights = n_cases))) %>%
+  activate(edges) %>%
+  filter(n_cases >= 20) %>%
+  activate(nodes) %>%
+  filter(!node_is_isolated()) %>%
+  ggraph() +
+  geom_edge_link(alpha = 0.1) +
+  geom_node_point(aes(size = degree, color = group), alpha = 0.8) +
+  # geom_node_text(aes(label = id), data = . %>% filter(is_gttf)) +
+  theme_void() +
+  rcartocolor::scale_color_carto_d(palette = "Vivid") +
+  scale_size_area(max_size = 8)
+```
+
+
+This is a totally cheap diagram—I might build something bigger & more useful as a React app
+
+```{r out.width=8, out.height=8}
+edge_to_d3 <- gttf_main_net %>%
+  activate(edges) %>%
+  as_tibble() %>%
+  mutate(across(c(from, to), ~ . - 1)) %>%
+  as.data.frame()
+node_to_d3 <- gttf_main_net %>%
+  as_tibble() %>%
+  mutate(is_gttf = ifelse(is_gttf, "GTTF member", "Non-GTTF")) %>%
+  left_join(clean_names, by = c("id" = "officer_id")) %>%
+  group_by(id) %>%
+  top_n(1, n) %>%
+  as.data.frame()
+
+forceNetwork(Links = edge_to_d3, Nodes = node_to_d3, Source = "from", Target = "to", 
+             Value = "n_cases", NodeID = "name_clean", Group = "is_gttf", Nodesize = "degree",
+             opacity = 0.8, colourScale = JS("d3.scaleOrdinal(['#6b7694', '#c1338b']);"), 
+             height = 800, width = 800, charge = -10,
+             radiusCalculation = JS("Math.sqrt(d.nodesize) / 3"), 
+             linkWidth = JS("function(d) { return Math.sqrt(d.value) / 2; }"),
+             linkColour = "#ababab", bounded = TRUE, fontSize = 14)
+```
+
+
+```{r}
+
+```
+
+
+
+
+
