@@ -1,39 +1,8 @@
-### Cops
-### kbmorales
+### Setup subjects for investigation
 ### kbmorales@protonmail.com
 
-### From chat with Zach 2020-04-08
-
-## Indicted or charged:
-# Thomas Allers
-# Keith Gladstone
-# Momodu Gondo
-# Robert Hankard # HANFORD is a common misspelling of HANKARD
-# Evodio Hendrix
-# Daniel Hersl
-# Wayne Jenkins
-# Craig Jester
-# Ivo Louvado
-# Jemell Rayam
-# Victor Rivera
-# Eric Snell
-# Marcus Taylor
-# Carmine Vignola
-# Maurice Ward
-
-## Other names of interest:
-# Sherrod Biggers
-# John Clewell
-# Ian Dombroski
-# Tariq Edwards
-# Jason Giordano
-# Ryan Guinn
-# Kenneth Ivery
-# Tariq Toro Munford
-# Dean Palmere
-# Michael Sylvester
-# Thomas Wilson III
-# Michael Woodlon
+# Uses a Google Sheet maintained by the GTTF team to read in and subset
+# suspect officers in prep for data extraction from CaseHarvester
 
 # Setup -------------------------------------------------------------------
 
@@ -42,32 +11,65 @@ library(googlesheets4)
 
 ## Force no auth
 gs4_deauth()
-       
-# First approach ----------------------------------------------------------
+
+# Google sheet ----------------------------------------------------------
 
 # Download data
-gttf_cops <- read_sheet(
+subjects <- read_sheet(
   "https://docs.google.com/spreadsheets/d/1wcq2rMb0OKX2_IzMHIAM7CqIR9F4i4-NLleXERA-MLI/edit?usp=sharing"
-  )
+)
 
-# Camille's clean names ---------------------------------------------------
+# Filter to initial set: indicted GTTF officers + Clewell, Gladstone
+# Decided 2020-10-04
 
-cops_df = read_csv(here::here("data/cleaned_cop_names.csv"))
+# variable phase on google sheet denotes phase of investigation -- restricting
+# to phase 1 for the moment
 
-names_lst = str_split_fixed(cops_df$name_clean, ", | ", 3)
+subjects = subjects %>%
+  filter(phase==1) # Need to revisit when planning on expanding
 
-cops_df %>% 
-  mutate(last_name = names_lst[,1],
-         first_name = names_lst[,2],
-         other_name = names_lst[,3]) %>% 
-  filter(last_name %in% cops$last_name |
-           last_name %in% cops$other_spellings) %>% 
-  filter(first_name %in% cops$first_name |
-           # str_detect(first_name, paste(cops$first_name, collapse = "|")) |
-           str_detect(first_name,
-                      # look for first initial
-                      paste0("^",
-                             substr(cops$first_name, 1,1),
-                             "$"
-                             ))) %>%
-  View()
+# Add in first initial for string matching
+subjects$first_initial = str_extract(subjects$first_name, "^\\w")
+
+subject_ids = unlist(str_split(subjects$officer_id,
+                               ", ")
+                     )
+
+# Name Filter ----------------------------------------------------------------
+
+### Decided to focus on
+
+### Create last name filter
+last_name_pat <- paste(paste0("^", subjects$last_name),
+                       sep=" ",
+                       collapse = "|")
+
+# Using cleaned cop names -------------------------------------------------
+
+## Return to this
+
+# cops_df = read_csv(here::here("data/cleaned_cop_names.csv"))
+
+# cops_df %>%
+#   filter(officer_id %in% subject_ids) %>%
+#   arrange(officer_id)
+
+# Name filter work --------------------------------------------------------
+
+# names_lst = str_split_fixed(cops_df$name_clean, ", | ", 3)
+
+# cops_df %>%
+#   mutate(last_name = names_lst[,1],
+#          first_name = names_lst[,2],
+#          other_name = names_lst[,3]) %>%
+#   filter(last_name %in% subjects$last_name |
+#            last_name %in% subjects$other_spellings) %>%
+#   filter(first_name %in% subjects$first_name |
+#            # str_detect(first_name, paste(cops$first_name, collapse = "|")) |
+#            str_detect(first_name,
+#                       # look for first initial
+#                       paste0("^",
+#                              substr(subjects$first_name, 1,1),
+#                              "$"
+#                       ))) %>%
+#   View()

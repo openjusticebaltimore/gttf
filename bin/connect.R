@@ -7,38 +7,42 @@
 
 library(DBI)
 library(dbplyr)
+library(dplyr)
 library(RPostgreSQL)
-
 
 # DBI ---------------------------------------------------------------------
 
 con <- dbConnect(odbc::odbc(),
                  dsn = "PostgreSQL30")
 
-# Tables -------------------------------------------------------------
+# Main cases table --------------------------------------------------------
 
-## Cases - master
-cases <- tbl(con, 
+cases <- tbl(con,
              in_schema("public", "cases"))
 
-## cc - Circuit court civil
+# dscivil - District Court Civil ------------------------------------------
 
-## dscivil - District Court Civil
+# Civil cases currently out of scope of project
 
-## dscr - District court criminal
-dscr <- tbl(con, 
+# cc - Circuit Court Civil ------------------------------------------------
+
+# Civil cases currently out of scope of project
+
+# dscr - District Court Criminal ------------------------------------------
+
+dscr <- tbl(con,
             in_schema("public", "dscr"))
 
 ### Sub tables
 
 # Relations
-dscr_rel <- tbl(con, 
-                in_schema("public", 
+dscr_rel <- tbl(con,
+                in_schema("public",
                           "dscr_related_persons"))
 
 # Charges
-dscr_chr <- tbl(con, 
-                in_schema("public", 
+dscr_chr <- tbl(con,
+                in_schema("public",
                           "dscr_charges"))
 
 ##use cjis code
@@ -51,8 +55,10 @@ dscr_def <- tbl(con,
                 in_schema("redacted",
                           "dscr_defendants"))
 
-## dsk8 - Circuit Court Criminal
-dsk8 = tbl(con, 
+
+# dsk8 - Circuit Court Criminal -------------------------------------------
+
+dsk8 = tbl(con,
            in_schema("public", "dsk8"))
 
 ### Sub tables
