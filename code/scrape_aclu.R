@@ -31,15 +31,18 @@ out$complaints <- map_dfr(dfs$complaints, function(df) {
   select(1:2) %>%
   mutate(complaints = parse_number(complaints))
 
+# need to make dummy (\\d) markers to be able to split e.g. Hersl but not Chanoine
 out$sustained <- as.data.frame(dfs$sustained[[1]]) %>%
   set_names(c("officer", "total_sustained", "desc")) %>%
   as_tibble() %>%
-  separate_rows(desc, sep = ",") %>%
-  mutate(total_sustained = parse_number(total_sustained),
-         desc = str_squish(desc),
-         officer = str_remove_all(officer, "\\d+")) %>%
+  mutate(desc = str_squish(desc) %>%
+           str_replace("(?<!\\))(\\b)$", " (666)") %>%
+           str_match_all("([A-Z][\\w\\s,/\\-]+ \\(\\d+\\))") %>%
+           map(~.[,1]),
+         officer = str_squish(str_remove_all(officer, "\\d+"))) %>%
+  unnest(desc) %>%
   extract(desc, into = c("desc", "sustained"), regex = "(^.+) \\((\\d+)\\)$") %>%
-  mutate(sustained = parse_number(sustained))
+  mutate(sustained = na_if(parse_number(sustained), 666))
 
 out$q90 <- map_dfr(dfs$q90, function(df) {
   as.data.frame(df[-1, ]) %>%
@@ -48,4 +51,4 @@ out$q90 <- map_dfr(dfs$q90, function(df) {
   janitor::clean_names() %>%
   mutate(across(complaints:use_of_force_incidents, parse_number))
 
-iwalk(out, ~write_csv(.x, file.path("data", "aclu_extract", str_glue("{.y}.csv"))))
+iwalk(out, ~write_csv(.x, file.path("data", "aclu_extract", str_glue("{.y}.csv")), na = ""))
